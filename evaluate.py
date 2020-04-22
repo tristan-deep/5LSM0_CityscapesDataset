@@ -21,7 +21,7 @@ from torch.utils.data import DataLoader
 from models.UNet import UNet
 from train import load_data
 
-PATH = 'weights/unet-test1.pt'
+PATH = 'weights/unet-test2.pt'
 DATADIR = 'datasets/citys'
 
 '''device''' 
@@ -32,8 +32,8 @@ print('using device:', device)
 
 '''model'''
 model = UNet(n_classes=19,
-             depth=2,
-             wf=2,
+             depth=4,
+             wf=3,
              padding=True,
              up_mode='upsample').to(device)
 

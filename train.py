@@ -77,18 +77,19 @@ def train(data_generator, optim, epochs, print_every, save_model=True):
                     optim.step()
                 
                 if t % print_every == 0:
-                    print('[{}/{} ({:.0f}%)]\t{} Loss: {:.6f}'.format(
-                    t * len(X), len(data_generator[phase]),
+                    print('[{}/{} ({:.0f}%)]\t{} Loss: {}'.format(
+                    t * len(X), len(data_generator[phase].dataset),
                     100. * t / len(data_generator[phase]), phase, loss.item()))
     
     if save_model:
         PATH = checkfile()
         torch.save(model.state_dict(), PATH)
+        print('saved model -> {}'.format(PATH))
     
 if __name__ == '__main__':
     
     '''data'''    
-    data_generator = load_data('datasets/citys', batch_size=1)
+    data_generator = load_data('datasets/citys', batch_size=3)
         
     '''device''' 
     no_cuda = False
@@ -98,13 +99,13 @@ if __name__ == '__main__':
     
     '''model'''
     model = UNet(n_classes=19,
-                 depth=2,
-                 wf=2,
+                 depth=4,
+                 wf=3,
                  padding=True,
                  up_mode='upsample').to(device)
     
     '''training'''
-    optim = torch.optim.Adam(model.parameters())    
+    optim = torch.optim.Adam(model.parameters(), 5e-4, (0.9, 0.999), eps=1e-08, weight_decay=1e-4)    
     
     train(data_generator,
           optim=optim,
