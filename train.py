@@ -66,7 +66,7 @@ def train(data_generator, optim, epochs, print_every, save_model=True):
                 y = y[:,0,:,:].to(device)       # [N, H, W] with class indices (0, 1)
                 y = y.long()                    # otherwise loss throws an error
                 
-                prediction = model(X)           # [N, 2, H, W]
+                prediction = model(X)           # [N, 19, H, W]
                 
                 loss = F.cross_entropy(prediction, y)
         
