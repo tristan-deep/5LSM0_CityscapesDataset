@@ -51,9 +51,9 @@ def train(data_generator, optim, epochs, print_every, save_model=True):
 
     for epoch in range(epochs):
         print('Epoch {}/{}'.format(epoch, epochs - 1))
-        print('-' * 38)
+        print('-' * 64)
         
-        for phase in ['train', 'val']:
+        for phase in ['train']:#, 'val']:
             if phase == 'train':
     #            optimizer = scheduler(optimizer, epoch)
                 model.train(True)           # Set model to training mode
@@ -89,7 +89,7 @@ def train(data_generator, optim, epochs, print_every, save_model=True):
 if __name__ == '__main__':
     
     '''data'''    
-    data_generator = load_data('datasets/citys', batch_size=3)
+    data_generator = load_data('datasets/citys', batch_size=4)
         
     '''device''' 
     no_cuda = False
@@ -104,11 +104,14 @@ if __name__ == '__main__':
                  padding=True,
                  up_mode='upsample').to(device)
     
+    from torchsummary import summary
+    summary(model, input_size=(3, 1024, 2048))
+    
     '''training'''
     optim = torch.optim.Adam(model.parameters(), 5e-4, (0.9, 0.999), eps=1e-08, weight_decay=1e-4)    
     
     train(data_generator,
           optim=optim,
-          epochs=1,
-          print_every=10,
+          epochs=5,
+          print_every=20,
           save_model=True)
