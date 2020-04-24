@@ -64,7 +64,7 @@ def train(data_generator, optim, epochs, print_every, save_model=True):
                 
                 X = X.to(device)                # [N, 1, H, W]
                 y = y[:,0,:,:].to(device)       # [N, H, W] with class indices (0, 1)
-                y = y.long()                    # otherwise loss throws an error
+                y = (y * 255).long()                    # otherwise loss throws an error
                 
                 prediction = model(X)           # [N, 19, H, W]
                 
@@ -98,7 +98,7 @@ if __name__ == '__main__':
     print('using device:', device)
     
     '''model'''
-    model = UNet(n_classes=19,
+    model = UNet(n_classes=34,
                  depth=4,
                  wf=3,
                  padding=True,
