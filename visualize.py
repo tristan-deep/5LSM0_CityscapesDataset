@@ -89,9 +89,10 @@ if __name__ == '__main__':
     model = UNet(n_classes=34,
                  depth=4,
                  wf=3,
+                 batch_norm=True,
                  padding=True,
                  up_mode='upsample')
     
-    visualize(model_path='weights/unet-test5.pt',
+    visualize(model_path='weights/unet-test9.pt',
               model=model, dataset='val',
               batch_size=3)

@@ -16,6 +16,7 @@ import torch.nn.functional as F
 from torchvision import datasets, transforms
 from torch.utils.data import DataLoader
 import os
+import matplotlib.pyplot as plt
 
 from models.UNet import UNet
 
@@ -48,9 +49,11 @@ def load_data(DATADIR, batch_size=1):
 
 
 def train(data_generator, optim, epochs, print_every, save_model=True):
-
+    
+    eval_ = {'loss': [], 'train_acc': [], 'valid_acc': []}
+    
     for epoch in range(epochs):
-        print('Epoch {}/{}'.format(epoch, epochs - 1))
+        print('Epoch {}/{}, lr: {}'.format(epoch, epochs - 1, scheduler.get_lr()[0]))
         print('-' * 64)
         
         for phase in ['train']:#, 'val']:
@@ -80,11 +83,18 @@ def train(data_generator, optim, epochs, print_every, save_model=True):
                     print('[{}/{} ({:.0f}%)]\t{} Loss: {}'.format(
                     t * len(X), len(data_generator[phase].dataset),
                     100. * t / len(data_generator[phase]), phase, loss.item()))
+                    
+                eval_['loss'].append(loss)
+        scheduler.step()
+                
+    print('Training done.\n') 
     
     if save_model:
         PATH = checkfile()
         torch.save(model.state_dict(), PATH)
         print('saved model -> {}'.format(PATH))
+        
+    return eval_
     
 if __name__ == '__main__':
     
@@ -101,6 +111,7 @@ if __name__ == '__main__':
     model = UNet(n_classes=34,
                  depth=4,
                  wf=3,
+                 batch_norm=True,
                  padding=True,
                  up_mode='upsample').to(device)
     
@@ -108,10 +119,22 @@ if __name__ == '__main__':
     summary(model, input_size=(3, 1024, 2048))
     
     '''training'''
-    optim = torch.optim.Adam(model.parameters(), 5e-4, (0.9, 0.999), eps=1e-08, weight_decay=1e-4)    
+    optim = torch.optim.Adam(model.parameters(),
+                             lr=1e-2,
+                             betas=(0.9, 0.999),
+                             eps=1e-08,
+                             weight_decay=5e-4)    
     
-    train(data_generator,
-          optim=optim,
-          epochs=5,
-          print_every=20,
-          save_model=True)
+    from torch.optim.lr_scheduler import StepLR
+    scheduler = StepLR(optim, step_size=2, gamma=0.1)
+    
+    eval_= train(data_generator,
+                 optim=optim,
+                 epochs=8,
+                 print_every=20,
+                 save_model=True)
+    
+    plt.plot(eval_['loss'])
+    plt.grid()
+    plt.ylabel('Loss')
+    plt.xlabel('Iterations')
