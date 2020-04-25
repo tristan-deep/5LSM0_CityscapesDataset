@@ -51,9 +51,9 @@ def train(data_generator, optim, epochs, print_every, save_model=True):
 
     for epoch in range(epochs):
         print('Epoch {}/{}'.format(epoch, epochs - 1))
-        print('-' * 38)
+        print('-' * 64)
         
-        for phase in ['train', 'val']:
+        for phase in ['train']:#, 'val']:
             if phase == 'train':
     #            optimizer = scheduler(optimizer, epoch)
                 model.train(True)           # Set model to training mode
@@ -64,7 +64,7 @@ def train(data_generator, optim, epochs, print_every, save_model=True):
                 
                 X = X.to(device)                # [N, 1, H, W]
                 y = y[:,0,:,:].to(device)       # [N, H, W] with class indices (0, 1)
-                y = y.long()                    # otherwise loss throws an error
+                y = (y * 255).long()                    # otherwise loss throws an error
                 
                 prediction = model(X)           # [N, 19, H, W]
                 
@@ -89,7 +89,7 @@ def train(data_generator, optim, epochs, print_every, save_model=True):
 if __name__ == '__main__':
     
     '''data'''    
-    data_generator = load_data('datasets/citys', batch_size=3)
+    data_generator = load_data('datasets/citys', batch_size=4)
         
     '''device''' 
     no_cuda = False
@@ -98,17 +98,20 @@ if __name__ == '__main__':
     print('using device:', device)
     
     '''model'''
-    model = UNet(n_classes=19,
+    model = UNet(n_classes=34,
                  depth=4,
                  wf=3,
                  padding=True,
                  up_mode='upsample').to(device)
+    
+    from torchsummary import summary
+    summary(model, input_size=(3, 1024, 2048))
     
     '''training'''
     optim = torch.optim.Adam(model.parameters(), 5e-4, (0.9, 0.999), eps=1e-08, weight_decay=1e-4)    
     
     train(data_generator,
           optim=optim,
-          epochs=1,
-          print_every=10,
+          epochs=5,
+          print_every=20,
           save_model=True)
