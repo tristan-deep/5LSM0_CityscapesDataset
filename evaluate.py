@@ -61,6 +61,6 @@ if __name__ == '__main__':
                  padding=True,
                  up_mode='upsample')
     
-    evaluate(model_path='weights/unet-test9.pt',
+    evaluate(model_path='weights/unet-test12.pt',
               model=model, dataset='val',
-              batch_size=3)
+              batch_size=10)

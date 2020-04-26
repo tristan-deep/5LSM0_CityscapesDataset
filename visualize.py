@@ -93,6 +93,6 @@ if __name__ == '__main__':
                  padding=True,
                  up_mode='upsample')
     
-    visualize(model_path='weights/unet-test9.pt',
+    visualize(model_path='weights/unet-test13.pt',
               model=model, dataset='val',
               batch_size=3)

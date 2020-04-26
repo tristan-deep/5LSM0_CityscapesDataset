@@ -126,11 +126,11 @@ if __name__ == '__main__':
                              weight_decay=5e-4)    
     
     from torch.optim.lr_scheduler import StepLR
-    scheduler = StepLR(optim, step_size=2, gamma=0.1)
+    scheduler = StepLR(optim, step_size=3, gamma=0.5)
     
     eval_= train(data_generator,
                  optim=optim,
-                 epochs=8,
+                 epochs=30,
                  print_every=20,
                  save_model=True)
     
