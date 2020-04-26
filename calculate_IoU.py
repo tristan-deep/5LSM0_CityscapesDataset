@@ -29,4 +29,4 @@ def calculate_IoU(target, prediction, n_classes=34):
     IoU_n_classes = np.average(IoU)
     print(IoU_n_classes)
     
-    return IoU_n_classes
+    return IoU, IoU_n_classes
