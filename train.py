@@ -13,42 +13,16 @@
 
 import torch
 import torch.nn.functional as F
-from torchvision import datasets, transforms
-from torch.utils.data import DataLoader
-import os
+
 import matplotlib.pyplot as plt
 
 from models.UNet import UNet
+from utils.data import load_data, checkfile
+from utils.count_classes import WEIGHTS
 
-def checkfile(PATH='weights/unet-test%s.pt'):
-    i=1
-    while os.path.exists(PATH % i): # check if file exists
-        i += 1            
-    return PATH % i
+weights = torch.FloatTensor(list(WEIGHTS.values()))
 
-def load_data(DATADIR, batch_size=1):
-    transform = transforms.Compose([
-        # you can add other transformations in this list
-        transforms.ToTensor()
-    ])
-    
-    params = {'mode': 'fine',
-              'target_type': 'semantic',
-              'transform': transform,
-              'target_transform': transform}
-    
-    train_set = datasets.Cityscapes(DATADIR, split='train', **params)
-    train_generator = DataLoader(train_set, batch_size=batch_size, shuffle=False)
-    
-    val_set = datasets.Cityscapes(DATADIR, split='val', **params)
-    val_generator = DataLoader(val_set, batch_size=batch_size, shuffle=False)
-    
-    data_generator = {"train": train_generator, "val": val_generator}
-    
-    return data_generator
-
-
-def train(data_generator, optim, epochs, print_every, save_model=True):
+def train(data_generator, optim, epochs, print_every, save_model=True, weighted_loss=False):
     
     eval_ = {'loss': [], 'train_acc': [], 'valid_acc': []}
     
@@ -71,8 +45,11 @@ def train(data_generator, optim, epochs, print_every, save_model=True):
                 
                 prediction = model(X)           # [N, 19, H, W]
                 
-                loss = F.cross_entropy(prediction, y)
-        
+                if weighted_loss:
+                    loss = F.cross_entropy(prediction, y, weights)
+                else:
+                    loss = F.cross_entropy(prediction, y)
+                    
                 optim.zero_grad()               # zero the parameter (weight) gradients
                 
                 if phase == 'train':
@@ -107,6 +84,8 @@ if __name__ == '__main__':
     device = torch.device('cuda:0' if use_cuda else 'cpu')
     print('using device:', device)
     
+    weights = weights.to(device)
+    
     '''model'''
     model = UNet(n_classes=34,
                  depth=4,
@@ -126,13 +105,14 @@ if __name__ == '__main__':
                              weight_decay=5e-4)    
     
     from torch.optim.lr_scheduler import StepLR
-    scheduler = StepLR(optim, step_size=3, gamma=0.5)
+    scheduler = StepLR(optim, step_size=1, gamma=0.1)
     
     eval_= train(data_generator,
                  optim=optim,
-                 epochs=30,
+                 epochs=2,
                  print_every=20,
-                 save_model=True)
+                 save_model=True,
+                 weighted_loss=True)
     
     plt.plot(eval_['loss'])
     plt.grid()

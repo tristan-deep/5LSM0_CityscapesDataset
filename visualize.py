@@ -15,7 +15,7 @@ from matplotlib import pyplot as plt
 import torch
 
 from models.UNet import UNet
-from train import load_data
+from utils.data import load_data
 from utils.labels import labels
 
 def get_color_image(img):

@@ -3,7 +3,7 @@
     Eindhoven University of Technology
 ==============================================================================
 
-    Source Name   : calculate_IoU.py
+    Source Name   : metrics.py
                     
     Author(s)     : Tristan Stevens and Nadine Nijssen
     Date          : Mon Apr 25 18:09:46 2020

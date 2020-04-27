@@ -16,8 +16,7 @@ import torch
 from models.UNet import UNet
 from train import load_data
 
-from calculate_IoU import calculate_IoU
-
+from utils.metrics import calculate_IoU
 
 def evaluate(model_path, model, dataset='val', batch_size=1):
     

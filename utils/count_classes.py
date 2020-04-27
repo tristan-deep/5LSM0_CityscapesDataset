@@ -14,7 +14,7 @@
 import torch
 import math
 
-from train import load_data
+from utils.data import load_data
 
 def count_classes(data_set='train', batch_size=100):
     '''device''' 
