@@ -12,42 +12,96 @@
 """
 
 import torch
+import math
+
 from train import load_data
 
-'''device''' 
-no_cuda = False
-use_cuda = not no_cuda and torch.cuda.is_available()
-device = torch.device('cuda:0' if use_cuda else 'cpu')
-print('using device:', device)
-
-def count_classes():
-    pass
-
-train_generator = load_data('datasets/citys', batch_size=100)['train']
-
-n_classes = 34
-class_amount = {entry: [] for entry in range(n_classes)} 
-
-for i, (_, y) in enumerate(train_generator):
-    y = (255 * y).int().to(device)    
-    classes, counts = torch.unique(y, return_counts=True)
+def count_classes(data_set='train', batch_size=100):
+    '''device''' 
+    no_cuda = False
+    use_cuda = not no_cuda and torch.cuda.is_available()
+    device = torch.device('cuda:0' if use_cuda else 'cpu')
+    print('using device:', device)
     
-    for j in range(len(classes)):
-        class_amount[classes[j].item()] =+ counts[j].item()
+
+    data_generator = load_data('datasets/citys', batch_size=batch_size)[data_set]
+    
+    n_classes = 34
+    class_amount = {entry: [] for entry in range(n_classes)} 
+    
+    for i, (_, y) in enumerate(data_generator):
+        y = (255 * y).int().to(device)    
+        classes, counts = torch.unique(y, return_counts=True)
         
-print(class_amount)
+        for j in range(len(classes)):
+            class_amount[classes[j].item()] =+ counts[j].item()
+        
+    print(class_amount)
     
-''' RESULTS
-{0: 12485, 1: 6115050, 2: 5631448, 3: 2372550, 4: 1628773, 5: 485216, 6: 1755448, 7: 51402716, 8: 11105883, 9: 389448, 10: 1127135, 
-11: 32944412, 12: 1404422, 13: 931716, 14: 647, 15: 1168, 16: 716904, 17: 1527438, 18: 496, 19: 249084, 20: 621830, 
-1: 25239449, 22: 1365658, 23: 5223362, 24: 1690760, 25: 111354, 26: 8587667, 27: 166024, 28: 268578, 29: 338064, 30: 54641, 
+    return class_amount
+
+def create_class_weight(labels_dict,mu=0.15):
+    '''
+    labels_dict : {ind_label: count_label}
+    mu : parameter to tune 
+    '''
+    total = sum(labels_dict.values())
+    keys = labels_dict.keys()
+    class_weight = dict()
+
+    for key in keys:
+        score = math.log(mu*total/float(labels_dict[key]))
+        class_weight[key] = score if score > 1.0 else 1.0
+        
+    print(class_weight)
+    return class_weight
+
+    
+''' RESULTS '''
+labels_dict={0: 12485, 1: 6115050, 2: 5631448, 3: 2372550, 4: 1628773, 5: 485216, 6: 1755448, 7: 51402716, 8: 11105883, 9: 389448, 10: 1127135, 
+11: 32944412, 12: 1404422, 13: 931716, 14: 647, 15: 1168, 16: 716904, 17: 1527438, 18: 496, 19: 249084, 20: 621830, 21: 25239449, 22: 1365658, 23: 5223362, 24: 1690760, 25: 111354, 26: 8587667, 27: 166024, 28: 268578, 29: 338064, 30: 54641, 
 31: 953315, 32: 347596, 33: 329214}
-''' 
+ 
+# using mu=0.15
+WEIGHTS={
+ 0: 7.592658424500733,
+ 1: 1.3986781235297439,
+ 2: 1.4810644665616552,
+ 3: 2.345465743154862,
+ 4: 2.7216040986344847,
+ 5: 3.932592195613941,
+ 6: 2.646706974253243,
+ 7: 1.0,
+ 8: 1.0,
+ 9: 4.152455996327125,
+ 10: 3.0897520543213357,
+ 11: 1.0,
+ 12: 2.8698052390081963,
+ 13: 3.2801583010138082,
+ 14: 10.552595332713706,
+ 15: 9.961893463826435,
+ 16: 3.5422444078104673,
+ 17: 2.785839247208519,
+ 18: 10.818365700489679,
+ 19: 4.599396159259686,
+ 20: 3.6845196047468995,
+ 21: 1.0,
+ 22: 2.8977947054807522,
+ 23: 1.5562898133715715,
+ 24: 2.6842529372599415,
+ 25: 5.404472032408247,
+ 26: 1.0591039650205016,
+ 27: 5.00505399201311,
+ 28: 4.52404497367802,
+ 29: 4.293951121561306,
+ 30: 6.116401831526866,
+ 31: 3.2572409640408253,
+ 32: 4.266145462387306,
+ 33: 4.3204783529948125}
         
-total = sum(class_amount.values(), 0.0)
-a = {k: v / total for k, v in class_amount.items()}
-
-
-''' Normalized
-dict_values([7.562085830055758e-05, 0.037038472531103296, 0.03410932568962422, 0.014370385851901313, 0.009865375429457274, 0.002938922737778402, 0.010632637922466737, 0.3113430118461998, 0.06726763353188396, 0.0023588619962703686, 0.006826985672454863, 0.19954222760490098, 0.008506495559165854, 0.00564334510311272, 3.918838231514678e-06, 7.074502402487085e-06, 0.004342242354753939, 0.009251595719734646, 3.004240746261639e-06, 0.0015086860928262783, 0.003766385127515877, 0.15287375221571084, 0.008271704453746325, 0.03163757450176348, 0.01024082678255913, 0.0006744641614097147, 0.052014957896625906, 0.0010055969065672224, 0.0016267600224787468, 0.002047632346056844, 0.0003309570939848432, 0.005774168885125835, 0.002105367069430566, 0.001994028453709232])
-'''
+if __name__ == '__main__':
+    labels_dict = count_classes()
+    weights = create_class_weight(labels_dict)
+    
+#total = sum(labels_dict.values(), 0.0)
+#a = {k: v / total for k, v in labels_dict.items()}
