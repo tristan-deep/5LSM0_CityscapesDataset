@@ -29,7 +29,7 @@ def get_color_image(img):
     out_img = np.array([[id2color[val] for val in row] for row in img], dtype='B')
     return out_img
 
-def visualize(model_path, model, dataset='val', batch_size=1):
+def visualize(model_path, model, dataset='val', batch_size=1, shuffle=True):
     
     DATADIR = 'datasets/citys'
     
@@ -39,13 +39,15 @@ def visualize(model_path, model, dataset='val', batch_size=1):
     device = torch.device('cuda:0' if use_cuda else 'cpu')
     print('using device:', device)
     
+    file = torch.load(model_path)
+    
     model = model.to(device)
     
-    model.load_state_dict(torch.load(model_path))
+    model.load_state_dict(file['model_state_dict'])
     print('Finished loading model!')
     model.eval()
     
-    data_generator = load_data(DATADIR, batch_size=batch_size)
+    data_generator = load_data(DATADIR, batch_size=batch_size, shuffle=shuffle)
     val_generator = data_generator[dataset]
     
     data = next(iter(val_generator))
@@ -91,8 +93,9 @@ if __name__ == '__main__':
                  wf=3,
                  batch_norm=True,
                  padding=True,
-                 up_mode='upsample')
+                 up_mode='upconv')
     
-    visualize(model_path='weights/unet-test13.pt',
+    visualize(model_path='weights/unet-id2.pt',
               model=model, dataset='val',
-              batch_size=3)
+              batch_size=3,
+              shuffle=False)
