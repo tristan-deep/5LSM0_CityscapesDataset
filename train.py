@@ -78,7 +78,6 @@ def train(data_generator, optim, epochs, print_every, save_model=True, loss_func
             'gamma': gamma,
             'lr_step_size': lr_step_size            
             }, PATH)
-        torch.save(model.state_dict(), PATH)
         print('saved model -> {}'.format(PATH))
         
     return eval_
