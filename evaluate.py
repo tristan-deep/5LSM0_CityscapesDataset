@@ -16,7 +16,7 @@ import torch
 from models.UNet import UNet
 from train import load_data
 
-from utils.metrics import calculate_IoU
+from utils.metrics import calculate_IoU, calculate_IoU_train_classes
 
 def evaluate(model_path, model, dataset='val', batch_size=1):
     
@@ -45,8 +45,13 @@ def evaluate(model_path, model, dataset='val', batch_size=1):
     
     pred = torch.argmax(prediction, dim=1).cpu()
     
-    IoU, IoU_n_classes = calculate_IoU(mask, pred, 34)
-    print(IoU)
+    IoU, IoU_dict, IoU_average = calculate_IoU(mask, pred, 34)
+    print('IoU per class: ')
+    for key, value in IoU_dict.items():
+        print(key, ' : ', value)
+    print('IoU average for 34 classes: ', IoU_average)
+    IoU_19_average = calculate_IoU_train_classes(IoU)
+    print('IoU average for 19 classes: ', IoU_19_average)
     
     return
 
@@ -60,6 +65,6 @@ if __name__ == '__main__':
                  padding=True,
                  up_mode='upsample')
     
-    evaluate(model_path='weights/unet-test12.pt',
+    evaluate(model_path='weights/unet-test13.pt',
               model=model, dataset='val',
-              batch_size=10)
+              batch_size=3)
