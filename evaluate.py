@@ -16,7 +16,7 @@ import torch
 from models.UNet import UNet
 from train import load_data
 
-from utils.metrics import calculate_IoU, calculate_IoU_train_classes
+from utils.metrics import calculate_I_and_U, calculate_IoU, calculate_average_IoU, calculate_IoU_train_classes
 
 def evaluate(model_path, model, dataset='val', batch_size=1):
     
@@ -45,7 +45,17 @@ def evaluate(model_path, model, dataset='val', batch_size=1):
     
     pred = torch.argmax(prediction, dim=1).cpu()
     
-    IoU, IoU_dict, IoU_average = calculate_IoU(mask, pred, 34)
+    # inside evaluation loop over multiple batches
+    # put the initialization for intersection and union in for loop >  "for i == 0:"
+    intersection=np.zeros(34, dtype=int)
+    union=np.zeros(34, dtype=int)
+    intersection, union = calculate_I_and_U(mask, pred, intersection=intersection, union=union)
+    print(intersection)
+    
+    # outside the evaluation loop over multiple batches
+    IoU = calculate_IoU(intersection, union, n_classes=34)
+    IoU_dict, IoU_average = calculate_average_IoU(IoU)
+    
     print('IoU per class: ')
     for key, value in IoU_dict.items():
         print(key, ' : ', value)
