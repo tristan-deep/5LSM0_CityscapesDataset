@@ -1,25 +1,34 @@
-def soft_dice_loss(y_true, y_pred, epsilon=1e-6): 
-    ''' 
-    Soft dice loss calculation for arbitrary batch size, number of classes, and number of spatial dimensions.
-    Assumes the `channels_last` format.
-  
-    # Arguments
-        y_true: b x X x Y( x Z...) x c One hot encoding of ground truth
-        y_pred: b x X x Y( x Z...) x c Network output, must sum to 1 over c channel (such as after softmax) 
-        epsilon: Used for numerical stability to avoid divide by zero errors
-    
-    # References
-        V-Net: Fully Convolutional Neural Networks for Volumetric Medical Image Segmentation 
-        https://arxiv.org/abs/1606.04797
-        More details on Dice loss formulation 
-        https://mediatum.ub.tum.de/doc/1395260/1395260.pdf (page 72)
-        
-        Adapted from https://github.com/Lasagne/Recipes/issues/99#issuecomment-347775022
-    '''
-    
-    # skip the batch and class axis for calculating Dice score
-    axes = tuple(range(1, len(y_pred.shape)-1)) 
-    numerator = 2. * np.sum(y_pred * y_true, axes)
-    denominator = np.sum(np.square(y_pred) + np.square(y_true), axes)
-    
-    return 1 - np.mean(numerator / (denominator + epsilon)) # average over classes and batch
+def dice_loss(output, target, weights=None, ignore_index=None):
+    """
+    output : NxCxHxW Variable
+    target :  NxHxW LongTensor
+    weights : C FloatTensor
+    ignore_index : int index to ignore from loss
+    """
+    eps = 0.0001
+
+    output = output.exp()
+    encoded_target = output.detach() * 0
+    if ignore_index is not None:
+        mask = target == ignore_index
+        target = target.clone()
+        target[mask] = 0
+        encoded_target.scatter_(1, target.unsqueeze(1), 1)
+        mask = mask.unsqueeze(1).expand_as(encoded_target)
+        encoded_target[mask] = 0
+    else:
+        encoded_target.scatter_(1, target.unsqueeze(1), 1)
+
+    if weights is None:
+        weights = 1
+
+    intersection = output * encoded_target
+    numerator = 2 * intersection.sum(0).sum(1).sum(1)
+    denominator = output + encoded_target
+
+    if ignore_index is not None:
+        denominator[mask] = 0
+    denominator = denominator.sum(0).sum(1).sum(1) + eps
+    loss_per_channel = weights * (1 - (numerator / denominator))
+
+    return loss_per_channel.sum() / output.size(1)
