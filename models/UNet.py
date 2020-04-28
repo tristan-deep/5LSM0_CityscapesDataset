@@ -41,6 +41,7 @@ class UNet(nn.Module):
         """
         super(UNet, self).__init__()
         assert up_mode in ('upconv', 'upsample')
+        self.up_mode = up_mode
         self.padding = padding
         self.depth = depth
         prev_channels = in_channels
@@ -87,15 +88,15 @@ class UNetConvBlock(nn.Module):
         block = []
 
         block.append(nn.Conv2d(in_size, out_size, kernel_size=3, padding=int(padding)))
-        block.append(nn.ReLU())
         if batch_norm:
             block.append(nn.BatchNorm2d(out_size))
-
+        block.append(nn.ReLU())
+        
         block.append(nn.Conv2d(out_size, out_size, kernel_size=3, padding=int(padding)))
-        block.append(nn.ReLU())
         if batch_norm:
             block.append(nn.BatchNorm2d(out_size))
-
+        block.append(nn.ReLU())
+        
         self.block = nn.Sequential(*block)
 
     def forward(self, x):
