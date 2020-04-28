@@ -14,7 +14,7 @@ import numpy as np
 import torch
 
 from models.UNet import UNet
-from train import load_data
+from utils.data import load_data
 
 from utils.metrics import calculate_I_and_U, calculate_IoU, calculate_average_IoU, calculate_IoU_train_classes
 
@@ -37,22 +37,24 @@ def evaluate(model_weights, model, dataset='val', batch_size=1):
     data_generator = load_data(DATADIR, batch_size=batch_size)
     val_generator = data_generator[dataset]
     
-    data = next(iter(val_generator))
-    imgs, mask = data[0].to(device), data[1].to(device)
-    
-    with torch.no_grad():    
-        prediction = model(imgs)
-    
-    pred = torch.argmax(prediction, dim=1).cpu()
-    
-    # inside evaluation loop over multiple batches
-    # put the initialization for intersection and union in for loop >  "for i == 0:"
-    intersection=np.zeros(34, dtype=int)
-    union=np.zeros(34, dtype=int)
-    intersection, union = calculate_I_and_U(mask, pred, intersection=intersection, union=union)
-    print(intersection)
-    
-    # outside the evaluation loop over multiple batches
+    for i, (X, y) in enumerate(val_generator):
+        imgs = X.to(device)
+        mask = y.to(device)
+        
+        with torch.no_grad():    
+            prediction = model(imgs)
+        
+        pred = torch.argmax(prediction, dim=1).cpu()
+        
+        if i == 0:
+            intersection=np.zeros(34, dtype=int)
+            union=np.zeros(34, dtype=int)
+        # calculate intersection and union per batch and add to previous batches
+        intersection, union = calculate_I_and_U(mask, pred, 
+                                                intersection=intersection, 
+                                                union=union)
+
+    # calculate IoU over full set
     IoU = calculate_IoU(intersection, union, n_classes=34)
     IoU_dict, IoU_average = calculate_average_IoU(IoU)
     
@@ -79,4 +81,4 @@ if __name__ == '__main__':
     
     evaluate(model_weights=model_weights,
               model=model, dataset='val',
-              batch_size=3)
+              batch_size=4)
