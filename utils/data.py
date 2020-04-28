@@ -25,6 +25,9 @@ def load_data(DATADIR, batch_size=1, shuffle=False):
     val_set = datasets.Cityscapes(DATADIR, split='val', **params)
     val_generator = DataLoader(val_set, batch_size=batch_size, shuffle=shuffle)
     
-    data_generator = {"train": train_generator, "val": val_generator}
+    test_set = datasets.Cityscapes(DATADIR, split='test', **params)
+    test_generator = DataLoader(test_set, batch_size=batch_size, shuffle=shuffle)
+    
+    data_generator = {"train": train_generator, "val": val_generator, "test": test_generator}
     
     return data_generator
