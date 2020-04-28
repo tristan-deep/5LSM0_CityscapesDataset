@@ -18,7 +18,7 @@ from train import load_data
 
 from utils.metrics import calculate_I_and_U, calculate_IoU, calculate_average_IoU, calculate_IoU_train_classes
 
-def evaluate(model_path, model, dataset='val', batch_size=1):
+def evaluate(model_weights, model, dataset='val', batch_size=1):
     
     DATADIR = 'datasets/citys'
     
@@ -30,7 +30,7 @@ def evaluate(model_path, model, dataset='val', batch_size=1):
     
     model = model.to(device)
     
-    model.load_state_dict(torch.load(model_path))
+    model.load_state_dict(model_weights['model_state_dict'])
     print('Finished loading model!')
     model.eval()
     
@@ -73,8 +73,10 @@ if __name__ == '__main__':
                  wf=3,
                  batch_norm=True,
                  padding=True,
-                 up_mode='upsample')
+                 up_mode='upconv')
     
-    evaluate(model_path='weights/unet-test13.pt',
+    model_weights = file = torch.load('weights/unet-id1.pt')
+    
+    evaluate(model_weights=model_weights,
               model=model, dataset='val',
               batch_size=3)

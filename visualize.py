@@ -18,6 +18,11 @@ from models.UNet import UNet
 from utils.data import load_data
 from utils.labels import labels
 
+def movingaverage(values, window):
+    weights = np.repeat(1.0, window)/window
+    sma = np.convolve(values, weights, 'valid')
+    return sma
+
 def get_color_image(img):
     '''
     Converts mask/label to RGB image
@@ -29,7 +34,7 @@ def get_color_image(img):
     out_img = np.array([[id2color[val] for val in row] for row in img], dtype='B')
     return out_img
 
-def visualize(model_path, model, dataset='val', batch_size=1, shuffle=True):
+def visualize(model_weights, model, dataset='val', batch_size=1, shuffle=True):
     
     DATADIR = 'datasets/citys'
     
@@ -38,12 +43,10 @@ def visualize(model_path, model, dataset='val', batch_size=1, shuffle=True):
     use_cuda = not no_cuda and torch.cuda.is_available()
     device = torch.device('cuda:0' if use_cuda else 'cpu')
     print('using device:', device)
-    
-    file = torch.load(model_path)
-    
+       
     model = model.to(device)
     
-    model.load_state_dict(file['model_state_dict'])
+    model.load_state_dict(model_weights['model_state_dict'])
     print('Finished loading model!')
     model.eval()
     
@@ -85,6 +88,19 @@ def visualize(model_path, model, dataset='val', batch_size=1, shuffle=True):
     
     return
 
+def plot_loss(p):
+    train_loss = p['train_loss']
+    train_loss = torch.stack(train_loss).cpu().detach().numpy()
+    smooth_train_loss = movingaverage(train_loss, 10)
+    
+    plt.plot(train_loss, alpha=0.5)
+    plt.plot(smooth_train_loss)
+    plt.grid()
+    plt.ylabel('Loss')
+    plt.xlabel('Iterations ({} epochs)'.format(p['epoch']))
+    plt.title(p['loss_function'])
+    plt.legend(['train loss','smooth train loss'])
+
 if __name__ == '__main__':
     
     '''model'''
@@ -95,7 +111,11 @@ if __name__ == '__main__':
                  padding=True,
                  up_mode='upconv')
     
-    visualize(model_path='weights/unet-id2.pt',
+    model_weights = file = torch.load('weights/unet-id1.pt')
+    
+    plot_loss(model_weights)
+    
+    visualize(model_weights=model_weights,
               model=model, dataset='val',
               batch_size=3,
               shuffle=False)
