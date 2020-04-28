@@ -23,13 +23,13 @@ from utils.count_classes import WEIGHTS
 
 def train(data_generator, optim, epochs, print_every, save_model=True, loss_function='CE'):
     
-    eval_ = {'loss': [], 'train_acc': [], 'valid_acc': []}
+    eval_ = {'train_loss': [], 'val_loss': []}
     
     for epoch in range(epochs):
         print('Epoch {}/{}, lr: {}'.format(epoch, epochs - 1, scheduler.get_lr()[0]))
         print('-' * 64)
         
-        for phase in ['train']:#, 'val']:
+        for phase in ['train', 'val']:
             if phase == 'train':
                 model.train(True)               # Set model to training mode
             else:
@@ -41,14 +41,19 @@ def train(data_generator, optim, epochs, print_every, save_model=True, loss_func
                 y = y[:,0,:,:].to(device)       # [N, H, W] with class indices (0, 1)
                 y = (y * 255).long()                    # otherwise loss throws an error
                 
-                prediction = model(X)           # [N, C, H, W]
+                if phase == 'train':
+                    prediction = model(X)           # [N, C, H, W]
+                else:
+                    with torch.no_grad():
+                       prediction = model(X) 
+                
                 
                 if loss_function == 'CE':
                     loss = F.cross_entropy(prediction, y)
                 elif loss_function == 'weightedCE':
                     loss = F.cross_entropy(prediction, y, weights)
                 elif loss_function == 'DICE':
-                    loss = L.soft_dice_loss(prediction, y)
+                    loss = L.dice_loss(prediction, y)
                     
                 optim.zero_grad()               # zero the parameter (weight) gradients
                 
@@ -60,8 +65,12 @@ def train(data_generator, optim, epochs, print_every, save_model=True, loss_func
                     print('[{}/{} ({:.0f}%)]\t{} Loss: {}'.format(
                     t * len(X), len(data_generator[phase].dataset),
                     100. * t / len(data_generator[phase]), phase, loss.item()))
+                
+                if phase == 'train':
+                    eval_['train_loss'].append(loss)
+                else:
+                    eval_['val_loss'].append(loss)
                     
-                eval_['loss'].append(loss)
         scheduler.step()
                 
     print('Training done.\n') 
@@ -72,7 +81,8 @@ def train(data_generator, optim, epochs, print_every, save_model=True, loss_func
             'epoch': epochs,
             'model_state_dict': model.state_dict(),
             'optimizer_state_dict': optim.state_dict(),
-            'train_loss': eval_['loss'],
+            'train_loss': eval_['train_loss'],
+            'val_loss': eval_['val_loss'],
             'loss_function': loss_function,
             'lr_init': lr_init,
             'gamma': gamma,
@@ -84,11 +94,11 @@ def train(data_generator, optim, epochs, print_every, save_model=True, loss_func
     
 if __name__ == '__main__':
     '''params'''
-    epochs = 1
+    epochs = 4
     batch_size = 4
     lr_init = 1e-2
-    lr_step_size = 2
-    gamma = 0.5
+    lr_step_size = 1
+    gamma = 0.1
     mu = 0.15
     
     '''data'''    
@@ -111,8 +121,8 @@ if __name__ == '__main__':
                  padding=True,
                  up_mode='upconv').to(device)
     
-    from torchsummary import summary
-    summary(model, input_size=(3, 1024, 2048))
+#    from torchsummary import summary
+#    summary(model, input_size=(3, 1024, 2048))
     
     '''training'''
     optim = torch.optim.Adam(model.parameters(),
@@ -131,7 +141,7 @@ if __name__ == '__main__':
                  save_model=True,
                  loss_function='weightedCE') # CE/weightedCE/DICE
     
-    plt.plot(eval_['loss'])
+    plt.plot(eval_['train_loss'])
     plt.grid()
     plt.ylabel('Loss')
     plt.xlabel('Iterations')
