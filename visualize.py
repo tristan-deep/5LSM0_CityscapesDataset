@@ -95,10 +95,10 @@ def plot_loss(p):
     train_loss = torch.stack(train_loss).cpu().detach().numpy()
     val_loss = torch.stack(val_loss).cpu().detach().numpy()
     val_loss = val_loss.reshape((125, -1))
-    val_loss = np.mean(val_loss, axis=0)
+    val_loss = np.mean(val_loss, axis=0)                # take mean of each epoch
     
-    smooth_train_loss = movingaverage(train_loss, 15)
-    epochs = np.linspace(len(train_loss)/4,p['epoch']*len(train_loss)/4,p['epoch'])
+    smooth_train_loss = movingaverage(train_loss, 30)   # smoothen train loss
+    epochs = np.linspace(len(train_loss)/p['epoch'],len(train_loss),p['epoch'])
     
     plt.figure()
     plt.plot(train_loss, color='C1', alpha=0.5)
@@ -121,7 +121,7 @@ if __name__ == '__main__':
                  padding=True,
                  up_mode='upconv')
     
-    model_weights = file = torch.load('weights/unet-id5.pt')
+    model_weights = file = torch.load('weights/unet-id4-1e-WCE.pt')
     
     plot_loss(model_weights)
     
