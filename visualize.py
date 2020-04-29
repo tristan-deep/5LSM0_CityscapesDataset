@@ -41,7 +41,7 @@ def visualize(model_weights, model, dataset='val', batch_size=1, shuffle=True):
     '''device''' 
     no_cuda = False
     use_cuda = not no_cuda and torch.cuda.is_available()
-    device = torch.device('cuda:0' if use_cuda else 'cpu')
+    device = torch.device('cuda:1' if use_cuda else 'cpu')
     print('using device:', device)
        
     model = model.to(device)
@@ -90,16 +90,26 @@ def visualize(model_weights, model, dataset='val', batch_size=1, shuffle=True):
 
 def plot_loss(p):
     train_loss = p['train_loss']
-    train_loss = torch.stack(train_loss).cpu().detach().numpy()
-    smooth_train_loss = movingaverage(train_loss, 10)
+    val_loss = p['val_loss']
     
-    plt.plot(train_loss, alpha=0.5)
-    plt.plot(smooth_train_loss)
+    train_loss = torch.stack(train_loss).cpu().detach().numpy()
+    val_loss = torch.stack(val_loss).cpu().detach().numpy()
+    val_loss = val_loss.reshape(int(len(val_loss)/p['epoch']), -1)
+    val_loss = np.mean(val_loss, axis=0)                # take mean of each epoch
+    
+    smooth_train_loss = movingaverage(train_loss, 30)   # smoothen train loss
+    epochs = np.linspace(len(train_loss)/p['epoch'],len(train_loss),p['epoch'])
+    
+    plt.figure()
+    plt.plot(train_loss, color='C1', alpha=0.5)
+    plt.plot(smooth_train_loss, color='C1')
+    plt.plot(epochs, val_loss, color='C0', linestyle='dashed', marker='^')
+    
     plt.grid()
     plt.ylabel('Loss')
     plt.xlabel('Iterations ({} epochs)'.format(p['epoch']))
     plt.title(p['loss_function'])
-    plt.legend(['train loss','smooth train loss'])
+    plt.legend(['train loss','smooth train loss','validation loss'])
 
 if __name__ == '__main__':
     
@@ -111,7 +121,7 @@ if __name__ == '__main__':
                  padding=True,
                  up_mode='upconv')
     
-    model_weights = file = torch.load('weights/unet-id1.pt')
+    model_weights = file = torch.load('weights/unet-id6-15e-WCE-d4-MS.pt')
     
     plot_loss(model_weights)
     
