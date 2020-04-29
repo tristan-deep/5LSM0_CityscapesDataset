@@ -94,7 +94,7 @@ def plot_loss(p):
     
     train_loss = torch.stack(train_loss).cpu().detach().numpy()
     val_loss = torch.stack(val_loss).cpu().detach().numpy()
-    val_loss = val_loss.reshape((125, -1))
+    val_loss = val_loss.reshape(int(len(val_loss)/p['epoch']), -1)
     val_loss = np.mean(val_loss, axis=0)                # take mean of each epoch
     
     smooth_train_loss = movingaverage(train_loss, 30)   # smoothen train loss
@@ -121,11 +121,11 @@ if __name__ == '__main__':
                  padding=True,
                  up_mode='upconv')
     
-    model_weights = file = torch.load('weights/unet-id4-1e-WCE.pt')
+    model_weights = file = torch.load('weights/unet-id6-15e-WCE-d4-MS.pt')
     
     plot_loss(model_weights)
     
-#    visualize(model_weights=model_weights,
-#              model=model, dataset='val',
-#              batch_size=3,
-#              shuffle=False)
+    visualize(model_weights=model_weights,
+              model=model, dataset='val',
+              batch_size=3,
+              shuffle=False)
