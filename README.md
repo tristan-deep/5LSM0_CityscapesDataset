@@ -14,7 +14,7 @@ If you want to run predictions use [save_prediction.py](save_prediction.py) and 
 ## Results
 ![](figures/predictions-id3-val3.png?raw=true)
 
-Scores on the test set: [link to Cityscapes benchmark](https://www.cityscapes-dataset.com/anonymous-results/?id=9737cb5272895b3ac9e29074c4860d5746ea38b45138737fb0e27583c06f9fc5:) 
+Scores on the test set: [link to Cityscapes benchmark](https://www.cityscapes-dataset.com/anonymous-results/?id=9737cb5272895b3ac9e29074c4860d5746ea38b45138737fb0e27583c06f9fc5) 
 
 categories     | IoU       
 ---------------|----------
