@@ -19,10 +19,11 @@ from utils.labels import labels
 # Opening JSON file 
 #f = open('evaluationResults/resultPixelLevelSemanticLabeling_unet-id1-4e-CE.json',)
 #f = open('evaluationResults/resultPixelLevelSemanticLabeling_unet-id2-10e-WCE.json',)
-f = open('evaluationResults/resultPixelLevelSemanticLabeling_unet-id3-10e-WCE-d5-MS.json',)
+#f = open('evaluationResults/resultPixelLevelSemanticLabeling_unet-id3-10e-WCE-d5-MS.json',)
 #f = open('evaluationResults/resultPixelLevelSemanticLabeling_unet-id5-4e-WCE.json',)
-f = open('evaluationResults/resultPixelLevelSemanticLabeling_unet-id6-15e-WCE-d4-MS.json',)
-  
+#f = open('evaluationResults/resultPixelLevelSemanticLabeling_unet-id6-15e-WCE-d4-MS.json',)
+f = open('evaluationResults/resultPixelLevelSemanticLabeling_unet-id7-baseline.json',)
+
 # returns JSON object as a dictionary 
 data = json.load(f)
 
