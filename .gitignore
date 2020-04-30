@@ -1,4 +1,6 @@
 datasets
 pytorch-semseg
+results/val
+results/test
 Tramac-Fast-SCNN-pytorch-a197f5e
 **/__pycache__/

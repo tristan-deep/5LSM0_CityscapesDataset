@@ -25,7 +25,7 @@ from cityscapesscripts.helpers.csHelpers import *
 sys.path.append('..')
 
 
-def prediction(groundTruthImgList, model_weights, model, dataset='val', batch_size=1, shuffle=True):
+def prediction(groundTruthImgList, file, model, dataset='val', batch_size=1, shuffle=True):
     
     DATADIR = 'datasets/citys'
     
@@ -35,6 +35,7 @@ def prediction(groundTruthImgList, model_weights, model, dataset='val', batch_si
     device = torch.device('cuda:0' if use_cuda else 'cpu')
     print('using device:', device)
        
+    model_weights = torch.load('weights/{}.pt'.format(file), map_location=device)
     model = model.to(device)
     
     model.load_state_dict(model_weights['model_state_dict'])
@@ -58,15 +59,9 @@ def prediction(groundTruthImgList, model_weights, model, dataset='val', batch_si
         # get name of prediction image to save
         csFile = getCsFileInfo(groundTruthImgList[i])
         # save the prediction images in the 'results' folder
-        filePattern = "results/val/unet-id6-15e-WCE-d4-MS/{}_{}_{}_pred.png".format(csFile.city, csFile.sequenceNb, csFile.frameNb)
-        # change to the results set you want to save predictions for
-            # unet-id1-4e-CE
-            # unet-id2-10e-WCE
-            # unet-id3-10e-WCE-d5-MS
-            # unet-id5-4e-WCE
-            # unet-id6-15e-WCE-d4-MS
-        
-        
+        filePattern = "results/{}/{}/{}_{}_{}_pred.png".format(dataset, file, csFile.city, csFile.sequenceNb, csFile.frameNb)
+
+                
         # save prediction image
         cv2.imwrite(filePattern, image_to_save)
         
@@ -77,11 +72,11 @@ def prediction(groundTruthImgList, model_weights, model, dataset='val', batch_si
     return
 
 
-def get_gt_file_names():
+def get_gt_file_names(dataset):
     # ground truth file names
 #    cityscapesPath = os.path.join(os.path.dirname(os.path.realpath(__file__)))
     cityscapesPath = os.path.join(os.path.dirname(os.path.realpath(__file__)),'datasets','citys')
-    groundTruthSearch  = os.path.join(cityscapesPath , "gtFine" , "val" , "*", "*_gtFine_labelIds.png" )
+    groundTruthSearch  = os.path.join(cityscapesPath , "gtFine" , dataset, "*", "*_gtFine_labelIds.png" )
     
     groundTruthImgList = glob.glob(groundTruthSearch)
     if not groundTruthImgList:
@@ -94,29 +89,27 @@ if __name__ == '__main__':
     
     '''model'''
     model = UNet(n_classes=34,
-                 depth=4,
+                 depth=5,
                  wf=3,
                  batch_norm=True,
                  padding=True,
                  up_mode='upconv')
     
-    # change to the model you want to save predictions for
+   
+# change to the results set you want to save predictions for
     # unet-id1-4e-CE
-#    model_weights = file = torch.load('weights/unet-id1-4e-CE.pt')
     # unet-id2-10e-WCE
-#    model_weights = file = torch.load('weights/unet-id2-10e-WCE.pt')
     # unet-id3-10e-WCE-d5-MS
-#    model_weights = file = torch.load('weights/unet-id3-10e-WCE-d5-MS.pt', map_location='cuda:0')
     # unet-id5-4e-WCE
-#    model_weights = file = torch.load('weights/unet-id5-4e-WCE.pt')
     # unet-id6-15e-WCE-d4-MS
-    model_weights = file = torch.load('weights/unet-id6-15e-WCE-d4-MS.pt')
+    file = 'unet-id3-10e-WCE-d5-MS'
+    dataset='val'
     
-    groundTruthImgList = get_gt_file_names()
+    groundTruthImgList = get_gt_file_names(dataset)
     
     prediction(groundTruthImgList,
-              model_weights=model_weights,
-              model=model, dataset='val',
+              file=file,
+              model=model, dataset=dataset,
               batch_size=1,
               shuffle=False)
     
