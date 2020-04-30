@@ -8,9 +8,24 @@ Data: go to [DOWNLOADS](https://www.cityscapes-dataset.com/downloads/) and start
 * save the cityscapes datasets in the `./datasets/citys` dir.
 
 ## Models
-All pretrained models are based on a simple U-net architecture and stored in [weights](weights) folder. The PyTorch implementation has been taken from this [repo](https://github.com/jvanvugt/pytorch-unet).
+All pretrained models are based on a simple U-net architecture and stored in [weights](weights) folder. The PyTorch implementation has been taken from this [repo](https://github.com/jvanvugt/pytorch-unet). Some changes are made and experimented with, see paper.
 If you want to run predictions use [save_prediction.py](save_prediction.py) and make sure the designated folder for the predictions exists.
 
 ## Results
 ![](figures/predictions-id3-val3.png?raw=true)
 
+Validation scores:
+
+categories     | IoU       
+---------------|----------
+construction   | 0.658
+flat           | 0.893
+human          | 0.125
+nature         | 0.780
+object         | 0.019
+sky            | 0.681
+vehicle        | 0.366
+void           |   nan
+--------------------------
+Score Average  | 0.503
+--------------------------
