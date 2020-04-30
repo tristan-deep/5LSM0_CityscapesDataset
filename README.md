@@ -14,18 +14,16 @@ If you want to run predictions use [save_prediction.py](save_prediction.py) and 
 ## Results
 ![](figures/predictions-id3-val3.png?raw=true)
 
-Validation scores:
+Scores on the test set: [link to Cityscapes benchmark](https://www.cityscapes-dataset.com/anonymous-results/?id=9737cb5272895b3ac9e29074c4860d5746ea38b45138737fb0e27583c06f9fc5:) 
 
 categories     | IoU       
 ---------------|----------
-construction   | 0.658
-flat           | 0.893
-human          | 0.125
-nature         | 0.780
-object         | 0.019
-sky            | 0.681
-vehicle        | 0.366
-void           |   nan
---------------------------
-Score Average  | 0.503
---------------------------
+construction   | 66.7421
+flat           | 89.7289
+human          | 5.89255
+nature         | 74.5018
+object         | 3.63665
+sky            | 78.8369
+vehicle        | 48.519
+---------------|----------
+**Score Average**  | 52.5512
