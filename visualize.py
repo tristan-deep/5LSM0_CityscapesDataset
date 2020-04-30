@@ -41,7 +41,7 @@ def visualize(model_weights, model, dataset='val', batch_size=1, shuffle=True):
     '''device''' 
     no_cuda = False
     use_cuda = not no_cuda and torch.cuda.is_available()
-    device = torch.device('cuda:1' if use_cuda else 'cpu')
+    device = torch.device('cuda:0' if use_cuda else 'cpu')
     print('using device:', device)
        
     model = model.to(device)
@@ -115,14 +115,24 @@ if __name__ == '__main__':
     
     '''model'''
     model = UNet(n_classes=34,
-                 depth=4,
+                 depth=5,
                  wf=3,
                  batch_norm=True,
                  padding=True,
                  up_mode='upconv')
     
-    model_weights = file = torch.load('weights/unet-id6-15e-WCE-d4-MS.pt')
-    
+    # change to the model you want to visualize
+    # unet-id1-4e-CE
+#    model_weights = file = torch.load('weights/unet-id1-4e-CE.pt')
+    # unet-id2-10e-WCE
+#    model_weights = file = torch.load('weights/unet-id2-10e-WCE.pt')
+    # unet-id3-10e-WCE-d5-MS
+    model_weights = file = torch.load('weights/unet-id3-10e-WCE-d5-MS.pt', map_location='cuda:0')
+    # unet-id5-4e-WCE
+#    model_weights = file = torch.load('weights/unet-id5-4e-WCE.pt')
+    # unet-id6-15e-WCE-d4-MS
+#    model_weights = file = torch.load('weights/unet-id6-15e-WCE-d4-MS.pt')
+   
     plot_loss(model_weights)
     
     visualize(model_weights=model_weights,

@@ -58,13 +58,20 @@ def prediction(groundTruthImgList, model_weights, model, dataset='val', batch_si
         # get name of prediction image to save
         csFile = getCsFileInfo(groundTruthImgList[i])
         # save the prediction images in the 'results' folder
-        filePattern = "results/{}_{}_{}_pred.png".format(csFile.city, csFile.sequenceNb, csFile.frameNb)
+        filePattern = "results/val/unet-id6-15e-WCE-d4-MS/{}_{}_{}_pred.png".format(csFile.city, csFile.sequenceNb, csFile.frameNb)
+        # change to the results set you want to save predictions for
+            # unet-id1-4e-CE
+            # unet-id2-10e-WCE
+            # unet-id3-10e-WCE-d5-MS
+            # unet-id5-4e-WCE
+            # unet-id6-15e-WCE-d4-MS
+        
         
         # save prediction image
         cv2.imwrite(filePattern, image_to_save)
         
-        if i == 4:
-            break
+#        if i == 4:
+#            break
     print('Prediction images saved.')
     
     return
@@ -72,7 +79,8 @@ def prediction(groundTruthImgList, model_weights, model, dataset='val', batch_si
 
 def get_gt_file_names():
     # ground truth file names
-    cityscapesPath = os.path.join(os.path.dirname(os.path.realpath(__file__)))#'datasets','citys')
+#    cityscapesPath = os.path.join(os.path.dirname(os.path.realpath(__file__)))
+    cityscapesPath = os.path.join(os.path.dirname(os.path.realpath(__file__)),'datasets','citys')
     groundTruthSearch  = os.path.join(cityscapesPath , "gtFine" , "val" , "*", "*_gtFine_labelIds.png" )
     
     groundTruthImgList = glob.glob(groundTruthSearch)
@@ -92,7 +100,17 @@ if __name__ == '__main__':
                  padding=True,
                  up_mode='upconv')
     
-    model_weights = file = torch.load('weights/old/unet-id1.pt')
+    # change to the model you want to save predictions for
+    # unet-id1-4e-CE
+#    model_weights = file = torch.load('weights/unet-id1-4e-CE.pt')
+    # unet-id2-10e-WCE
+#    model_weights = file = torch.load('weights/unet-id2-10e-WCE.pt')
+    # unet-id3-10e-WCE-d5-MS
+#    model_weights = file = torch.load('weights/unet-id3-10e-WCE-d5-MS.pt', map_location='cuda:0')
+    # unet-id5-4e-WCE
+#    model_weights = file = torch.load('weights/unet-id5-4e-WCE.pt')
+    # unet-id6-15e-WCE-d4-MS
+    model_weights = file = torch.load('weights/unet-id6-15e-WCE-d4-MS.pt')
     
     groundTruthImgList = get_gt_file_names()
     

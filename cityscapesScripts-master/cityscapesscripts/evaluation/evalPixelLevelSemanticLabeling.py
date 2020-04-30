@@ -78,7 +78,14 @@ def getPrediction( args, groundTruthFile ):
         elif 'CITYSCAPES_DATASET' in os.environ:
             rootPath = os.path.join( os.environ['CITYSCAPES_DATASET'] , "results" )
         else:
-            rootPath = os.path.join(os.path.dirname(os.path.realpath(__file__)),'..','..','..','results')
+            rootPath = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                    '..','..','..','results','val','unet-id6-15e-WCE-d4-MS')
+            # change to the results set you want to evaluate
+                # unet-id1-4e-CE
+                # unet-id2-10e-WCE
+                # unet-id3-10e-WCE-d5-MS
+                # unet-id5-4e-WCE
+                # unet-id6-15e-WCE-d4-MS
 
         if not os.path.isdir(rootPath):
             printError("Could not find a result root folder. Please read the instructions of this method.")
@@ -124,7 +131,7 @@ args = CArgs()
 if 'CITYSCAPES_DATASET' in os.environ:
     args.cityscapesPath = os.environ['CITYSCAPES_DATASET']
 else:
-    args.cityscapesPath = os.path.join(os.path.dirname(os.path.realpath(__file__)),'..','..','..')#'datasets','citys')
+    args.cityscapesPath = os.path.join(os.path.dirname(os.path.realpath(__file__)),'..','..','..')
 
 if 'CITYSCAPES_EXPORT_DIR' in os.environ:
     export_dir = os.environ['CITYSCAPES_EXPORT_DIR']
@@ -134,7 +141,7 @@ if 'CITYSCAPES_EXPORT_DIR' in os.environ:
 else:
     args.exportFile = os.path.join(args.cityscapesPath, "evaluationResults", "resultPixelLevelSemanticLabeling.json")
 # Parameters that should be modified by user
-args.groundTruthSearch  = os.path.join( args.cityscapesPath , "gtFine" , "val" , "*", "*_gtFine_labelIds.png" )
+args.groundTruthSearch  = os.path.join( args.cityscapesPath , 'datasets','citys', "gtFine" , "val" , "*", "*_gtFine_labelIds.png" )
 
 # Remaining params
 args.evalInstLevelScore = True
