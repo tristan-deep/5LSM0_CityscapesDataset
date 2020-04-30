@@ -34,29 +34,29 @@ name2label = {label.name : label for label in labels}
 classScores = data['classScores']
 averageScoreClasses = data['averageScoreClasses']
 # print class scores
-print("{:<25} {:<10}".format('classes','IoU'))
-print("--------------------------------")
+print("{:<15} {:<10}".format('classes','IoU'))
+print("--------------------------")
 for v in classScores.items():
     classes, iou = v
     if name2label[classes].trainId != 255:
-        print("{:<24}: {val:>5.3f}".format(classes, val=iou))
-print("--------------------------------")
-print("Score Average           : {val:>5.3f}".format(val=averageScoreClasses))
-print("--------------------------------")
+        print("{:<15}: {val:>5.3f}".format(classes, val=iou))
+print("--------------------------")
+print("Score Average  : {val:>5.3f}".format(val=averageScoreClasses))
+print("--------------------------")
 print("\n")
 
 
 categoryScores = data['categoryScores']
 averageScoreCategories = data['averageScoreCategories']
 # print category scores
-print("{:<25} {:<10}".format('categories','IoU'))
-print("--------------------------------")
+print("{:<15} {:<10}".format('categories','IoU'))
+print("--------------------------")
 for v in categoryScores.items():
     categories, iou = v
-    print("{:<24}: {val:>5.3f}".format(categories, val=iou))
-print("--------------------------------")
-print("Score Average           : {val:>5.3f}".format(val=averageScoreCategories))
-print("--------------------------------")
+    print("{:<15}: {val:>5.3f}".format(categories, val=iou))
+print("--------------------------")
+print("Score Average  : {val:>5.3f}".format(val=averageScoreCategories))
+print("--------------------------")
   
   
 # Closing file 
