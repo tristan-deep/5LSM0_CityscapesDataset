@@ -24,6 +24,6 @@ human          | 5.89255
 nature         | 74.5018
 object         | 3.63665
 sky            | 78.8369
-vehicle        | 48.519
+vehicle        | 48.5196
 ---------------|----------
 **Score Average**  | 52.5512
